@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Esquisitinha, aceita? 💌</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', 'Trebuchet MS', sans-serif;
+    background: linear-gradient(135deg, #ffdde1, #ee9ca7, #ff9a9e);
+    background-size: 400% 400%;
+    animation: gradientShift 12s ease infinite;
+    overflow: hidden;
+    position: relative;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .heart {
+    position: absolute;
+    top: -10%;
+    font-size: 24px;
+    opacity: 0.7;
+    animation: fall linear infinite;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  @keyframes fall {
+    to {
+      transform: translateY(110vh) rotate(360deg);
+    }
+  }
+
+  .card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(6px);
+    border-radius: 24px;
+    padding: 48px 40px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    max-width: 420px;
+    width: 90%;
+    z-index: 10;
+    position: relative;
+  }
+
+  .emoji-title {
+    font-size: 56px;
+    margin-bottom: 8px;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  h1 {
+    color: #d6336c;
+    font-size: 26px;
+    margin: 10px 0 6px;
+  }
+
+  p.subtitle {
+    color: #8a4b5e;
+    font-size: 16px;
+    margin-bottom: 32px;
+  }
+
+  .buttons {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    min-height: 70px;
+  }
+
+  button {
+    padding: 14px 30px;
+    font-size: 17px;
+    font-weight: bold;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  #yesBtn {
+    background: linear-gradient(135deg, #ff6b9d, #c04277);
+    color: white;
+    box-shadow: 0 8px 20px rgba(192, 66, 119, 0.4);
+  }
+
+  #yesBtn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 10px 25px rgba(192, 66, 119, 0.55);
+  }
+
+  #noBtn {
+    background: #000000;
+    color: #fffefe;
+    position: relative;
+  }
+
+  #successScreen {
+    display: none;
+  }
+
+  #successScreen .emoji-title {
+    font-size: 64px;
+  }
+
+  #successScreen h1 {
+    color: #c04277;
+  }
+
+  .yes-size {
+    transition: font-size 0.3s ease;
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="mainCard">
+  <div class="emoji-title">💗</div>
+  <h1>Ei, Esquisitinha...</h1>
+  <p class="subtitle">quer namorar comigo? 🥺💞</p>
+
+  <div class="buttons">
+    <button id="yesBtn" class="yes-size" onclick="showSuccess()">Sim! 💖</button>
+    <button id="noBtn">Não</button>
+  </div>
+</div>
+
+<div class="card" id="successScreen">
+  <div class="emoji-title">🎉💑🎉</div>
+  <h1>Ela disse SIM!</h1>
+  <p class="subtitle">Agora é oficial, a Esquisitinha aceitou!💍💗</p>
+</div>
+
+<script>
+  const noBtn = document.getElementById('noBtn');
+  const yesBtn = document.getElementById('yesBtn');
+  const mainCard = document.getElementById('mainCard');
+  const buttonsArea = document.querySelector('.buttons');
+  let dodgeCount = 0;
+
+  const phrases = ['Não', 'Tenta de novo', 'Quase!', 'Foge foge', 'Só clica no Sim 😌', 'Não vale', 'kkkk', 'Impossível'];
+
+  function moveNoButton() {
+    const cardRect = mainCard.getBoundingClientRect();
+    const btnRect = noBtn.getBoundingClientRect();
+
+    // Limites baseados na área do card original, não da tela toda
+    const padding = 12;
+    const minX = cardRect.left + padding;
+    const minY = cardRect.top + padding;
+    const maxX = cardRect.right - btnRect.width - padding;
+    const maxY = cardRect.bottom - btnRect.height - padding;
+
+    const newX = minX + Math.random() * Math.max(maxX - minX, 0);
+    const newY = minY + Math.random() * Math.max(maxY - minY, 0);
+
+    noBtn.style.position = 'fixed';
+    noBtn.style.left = newX + 'px';
+    noBtn.style.top = newY + 'px';
+
+    dodgeCount++;
+    // Yes button grows a little each time to be extra convincing
+    const newSize = Math.min(17 + dodgeCount * 1.5, 32);
+    yesBtn.style.fontSize = newSize + 'px';
+
+    // Loop infinito pelas frases
+    noBtn.textContent = phrases[dodgeCount % phrases.length];
+  }
+
+  noBtn.addEventListener('mouseover', moveNoButton);
+  noBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    moveNoButton();
+  });
+
+  // Mobile: also dodge on touch
+  noBtn.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    moveNoButton();
+  });
+
+  function showSuccess() {
+    document.getElementById('mainCard').style.display = 'none';
+    document.getElementById('successScreen').style.display = 'block';
+    launchConfetti();
+  }
+
+  // Floating hearts background
+  const heartsEmojis = ['💗','💖','💕','💞','❤️','💘'];
+  function createHeart() {
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.textContent = heartsEmojis[Math.floor(Math.random() * heartsEmojis.length)];
+    heart.style.left = Math.random() * 100 + 'vw';
+    heart.style.fontSize = (16 + Math.random() * 20) + 'px';
+    heart.style.animationDuration = (5 + Math.random() * 6) + 's';
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 12000);
+  }
+  setInterval(createHeart, 500);
+
+  function launchConfetti() {
+    for (let i = 0; i < 60; i++) {
+      setTimeout(() => {
+        const conf = document.createElement('div');
+        conf.className = 'heart';
+        conf.textContent = heartsEmojis[Math.floor(Math.random() * heartsEmojis.length)];
+        conf.style.left = Math.random() * 100 + 'vw';
+        conf.style.top = '-10px';
+        conf.style.fontSize = (14 + Math.random() * 22) + 'px';
+        conf.style.animationDuration = (3 + Math.random() * 3) + 's';
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 6000);
+      }, i * 40);
+    }
+  }
+</script>
+
+</body>
+</html>
